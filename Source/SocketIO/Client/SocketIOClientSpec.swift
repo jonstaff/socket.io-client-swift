@@ -287,6 +287,11 @@ public extension SocketIOClientSpec {
 public enum SocketClientEvent : String {
     // MARK: Cases
 
+    /// Emitted when the underlying engine determines that a better path is available. Useful for
+    /// consumers who wish to force a reconnection when their network changes. For example, this
+    /// would get triggered when a user who was previously on cellular connects to wifi.
+    case betterPathAvailable
+
     /// Emitted when the client connects. This is also called on a successful reconnection. A connect event gets one
     /// data item: the namespace that was connected to.
     ///
@@ -319,6 +324,10 @@ public enum SocketClientEvent : String {
     /// }
     /// ```
     case error
+
+    case networkReachable
+
+    case networkUnreachable
 
     /// Emitted whenever the engine sends a ping.
     ///

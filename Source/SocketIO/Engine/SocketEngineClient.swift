@@ -56,6 +56,10 @@ import Foundation
     /// Called when the engine sends a pong to the server. Only called in socket.io >3.
     func engineDidSendPong()
 
+    func engineDidChangeNetworkViability(isViable: Bool)
+
+    func engineHasBetterPathAvailable()
+
     /// Called when the engine has a message that must be parsed.
     ///
     /// - parameter msg: The message that needs parsing.

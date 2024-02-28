@@ -827,13 +827,14 @@ extension SocketEngine {
             parseEngineData(data)
         case let .viabilityChanged(isViable):
             DefaultSocketLogger.Logger.log("viabilityChanged - isViable: \(isViable)", type: SocketEngine.logType)
+            self.client?.engineDidChangeNetworkViability(isViable: isViable)
         case let .reconnectSuggested(isSuggested):
             DefaultSocketLogger.Logger.log("reconnectSuggested - isSuggested: \(isSuggested)", type: SocketEngine.logType)
 
             if isSuggested {
-                closeOutEngine(reason: "Better path available")
+                self.client?.engineHasBetterPathAvailable()
             }
-        case _:
+        default:
             break
         }
     }

@@ -45,7 +45,7 @@ public enum SocketAckStatus : String {
 
 private struct SocketAck : Hashable {
     let ack: Int
-    var callback: AckCallback!
+    var callback: AckCallback?
 
     init(ack: Int) {
         self.ack = ack
@@ -78,11 +78,16 @@ class SocketAckManager {
 
     /// Should be called on handle queue
     func executeAck(_ ack: Int, with items: [Any]) {
-        acks.remove(SocketAck(ack: ack))?.callback(items)
+        acks.remove(SocketAck(ack: ack))?.callback?(items)
     }
 
     /// Should be called on handle queue
     func timeoutAck(_ ack: Int) {
        acks.remove(SocketAck(ack: ack))?.callback?([SocketAckStatus.noAck.rawValue])
+    }
+
+    func cancelAck(_ ack: Int) {
+        DefaultSocketLogger.Logger.log("Canceling ack \(ack)", type: "SocketAckManager")
+        acks.remove(SocketAck(ack: ack))
     }
 }

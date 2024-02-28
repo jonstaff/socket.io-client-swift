@@ -21,6 +21,7 @@
 
 import Dispatch
 import Foundation
+import Network
 
 ///
 /// A manager for a socket.io connection.
@@ -129,6 +130,13 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     /// **This should not be modified directly.**
     public var waitingPackets = [SocketPacket]()
 
+    public var isNetworkReachable: Bool {
+        networkPathStatus == .satisfied
+    }
+
+    public private(set) var networkPathStatus: NWPath.Status = .requiresConnection
+    private let networkPathMonitor = NWPathMonitor()
+
     private(set) var reconnectAttempts = -1
 
     private var _config: SocketIOClientConfiguration
@@ -148,6 +156,20 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         super.init()
 
         setConfigs(_config)
+
+        // Make sure to do this after setConfigs() so that the handleQueue has been set
+        networkPathMonitor.pathUpdateHandler = didUpdateNetworkPath(_:)
+        networkPathMonitor.start(queue: handleQueue)
+    }
+
+    private func didUpdateNetworkPath(_ path: NWPath) {
+        guard networkPathStatus != path.status else {
+            return
+        }
+
+        DefaultSocketLogger.Logger.log("Network path status updated from \(networkPathStatus) to \(path.status)", type: SocketManager.logType)
+
+        networkPathStatus = path.status
     }
 
     /// Not so type safe way to create a SocketIOClient, meant for Objective-C compatiblity.
@@ -165,6 +187,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         DefaultSocketLogger.Logger.log("Manager is being released", type: SocketManager.logType)
 
         engine?.disconnect(reason: "Manager Deinit")
+        networkPathMonitor.cancel()
     }
 
     // MARK: Methods
@@ -423,8 +446,21 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
             self._engineDidWebsocketUpgrade(headers: headers)
         }
     }
-     private func _engineDidWebsocketUpgrade(headers: [String: String]) {
+
+    private func _engineDidWebsocketUpgrade(headers: [String: String]) {
         emitAll(clientEvent: .websocketUpgrade, data: [headers])
+    }
+
+    public func engineDidChangeNetworkViability(isViable: Bool) {
+        if isViable {
+            emitAll(clientEvent: .networkReachable, data: [])
+        } else {
+            emitAll(clientEvent: .networkUnreachable, data: [])
+        }
+    }
+
+    public func engineHasBetterPathAvailable() {
+        emitAll(clientEvent: .betterPathAvailable, data: [])
     }
 
     /// Called when the engine has a message that must be parsed.
