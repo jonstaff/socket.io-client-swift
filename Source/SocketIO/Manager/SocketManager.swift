@@ -134,6 +134,8 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         networkPathStatus == .satisfied
     }
 
+    public private(set) var isBetterPathAvailable = false
+
     public private(set) var networkPathStatus: NWPath.Status = .requiresConnection
     private let networkPathMonitor = NWPathMonitor()
 
@@ -214,6 +216,8 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
 
             return
         }
+
+        isBetterPathAvailable = false
 
         if engine == nil || forceNew {
             addEngine()
@@ -452,15 +456,20 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     }
 
     public func engineDidChangeNetworkViability(isViable: Bool) {
-        if isViable {
-            emitAll(clientEvent: .networkReachable, data: [])
-        } else {
-            emitAll(clientEvent: .networkUnreachable, data: [])
+        handleQueue.async {
+            if isViable {
+                self.emitAll(clientEvent: .networkReachable, data: [])
+            } else {
+                self.emitAll(clientEvent: .networkUnreachable, data: [])
+            }
         }
     }
 
-    public func engineHasBetterPathAvailable() {
-        emitAll(clientEvent: .betterPathAvailable, data: [])
+    public func engineBetterPathDidBecomeAvailable() {
+        handleQueue.async {
+            self.emitAll(clientEvent: .betterPathAvailable, data: [])
+            self.isBetterPathAvailable = true
+        }
     }
 
     /// Called when the engine has a message that must be parsed.

@@ -58,7 +58,7 @@ import Foundation
 
     func engineDidChangeNetworkViability(isViable: Bool)
 
-    func engineHasBetterPathAvailable()
+    func engineBetterPathDidBecomeAvailable()
 
     /// Called when the engine has a message that must be parsed.
     ///

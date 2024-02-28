@@ -832,7 +832,7 @@ extension SocketEngine {
             DefaultSocketLogger.Logger.log("reconnectSuggested - isSuggested: \(isSuggested)", type: SocketEngine.logType)
 
             if isSuggested {
-                self.client?.engineHasBetterPathAvailable()
+                self.client?.engineBetterPathDidBecomeAvailable()
             }
         default:
             break
