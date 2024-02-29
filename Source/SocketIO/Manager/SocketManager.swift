@@ -265,6 +265,8 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     open func disconnect() {
         DefaultSocketLogger.Logger.log("Manager closing", type: SocketManager.logType)
 
+        reconnecting = false
+        currentReconnectAttempt = 0
         status = .disconnected
 
         engine?.disconnect(reason: "Disconnect")
