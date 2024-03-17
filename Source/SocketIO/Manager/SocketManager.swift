@@ -136,7 +136,10 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
 
     public private(set) var isBetterPathAvailable = false
 
-    public private(set) var networkPathStatus: NWPath.Status = .requiresConnection
+    public private(set) var networkPath: NWPath?
+    public var networkPathStatus: NWPath.Status {
+        networkPath?.status ?? .requiresConnection
+    }
     private let networkPathMonitor = NWPathMonitor()
 
     private(set) var reconnectAttempts = -1
@@ -171,7 +174,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
 
         DefaultSocketLogger.Logger.log("Network path status updated from \(networkPathStatus) to \(path.status)", type: SocketManager.logType)
 
-        networkPathStatus = path.status
+        networkPath = path
     }
 
     /// Not so type safe way to create a SocketIOClient, meant for Objective-C compatiblity.
