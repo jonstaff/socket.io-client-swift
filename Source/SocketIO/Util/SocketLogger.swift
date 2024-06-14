@@ -64,7 +64,7 @@ public extension SocketLogger {
     }
 
     private func abstractLog(_ logType: String, message: @autoclosure () -> String, type: String) {
-        print("\(logType) \(type): \(message())")
+        print("\(logType) \(type): \(message)")
     }
 }
 
