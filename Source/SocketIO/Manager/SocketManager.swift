@@ -60,7 +60,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     ///
     /// If changed after calling `init`, `forceNew` must be set to `true`, or it will only connect to the url set in the
     /// init.
-    public let socketURL: URL
+    public var socketURL: URL
 
     /// The configuration for this client.
     ///
