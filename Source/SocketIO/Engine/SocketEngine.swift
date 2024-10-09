@@ -818,7 +818,8 @@ extension SocketEngine {
         case .cancelled:
             wsConnected = false
             websocketDidDisconnect(error: EngineError.canceled)
-        case .disconnected(_, _):
+        case .disconnected(let reason, let code):
+            DefaultSocketLogger.Logger.log("disconnected - reason: \(reason), code: \(code)", type: SocketEngine.logType)
             wsConnected = false
             websocketDidDisconnect(error: nil)
         case let .text(msg):
